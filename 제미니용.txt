@@ -1,0 +1,23 @@
+=== ArduOS Client v2.0 ===
+Available Ports:
+1. COM1 (통신 포트(COM1))
+2. COM4 (USB-SERIAL CH340(COM4))
+Select port number: 2
+Connected to COM4
+Commands: exec <file>, ls, cd <path>, pwd, ping, exit
+> lArduOS v2.0 Booting...
+System Ready.                                                                                                                             ls
+System Volume Information/
+shell.bin
+bin/
+test.bin
+> ls bin
+ls.bin
+> cd bin
+/bin/
+> ls bin
+GC: Freed addr 0
+> ls
+> ls
+> cd bin
+> 

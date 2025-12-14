@@ -1,0 +1,16 @@
+.pio
+.vscode
+.gemini
+*.hex
+*.elf
+*.bin
+*.o
+*.a
+*.d
+*.map
+client/ArduOSClient/target
+client/StreamProtocol/java/target
+client/StreamProtocol/c/obj
+client/StreamProtocol/cpp/obj
+__pycache__
+*.pyc
