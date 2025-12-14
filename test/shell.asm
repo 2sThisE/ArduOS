@@ -32,10 +32,6 @@ LOOP:
     EQ
     JIF CLEANUP
     
-    # Echo
-    DUP
-    PRTC
-    
     # Check LF (10)
     DUP
     PUSH 10
@@ -271,10 +267,10 @@ CHECK_EXEC_4:
     PUSH 66; LOAD; LOAD
     PUSH 'c'
     EQ
-    JIF CHECK_EXEC_END # [수정됨] 여기와 아래 라벨 이름을 일치시켰습니다
+    JIF CHECK_EXEC_END 
     JMP TRY_NEXT_CHECK
 
-CHECK_EXEC_END:        # [수정됨] 라벨 이름을 CHECK_EXEC_END로 통일
+CHECK_EXEC_END:       
     # 끝 (NULL or Space) 확인
     PUSH 66; LOAD; PUSH 1; ADD; PUSH 66; STORE
     PUSH 66; LOAD; LOAD

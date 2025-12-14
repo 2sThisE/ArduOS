@@ -4,9 +4,9 @@
 #include <Arduino.h>
 
 // --- 시스템 설정 ---
-#define TASK_COUNT 1                // 동시 실행 프로그램 수
+#define TASK_COUNT 3                // 동시 실행 프로그램 수
 #define CODE_BUFFER_SIZE 32         // 코드 스트리밍 탄창 크기
-#define VM_STACK_SIZE 128           // VM 스택 크기 (확장됨)
+#define VM_STACK_SIZE 64            // VM 스택 크기 (128 -> 64 축소)
 #define GLOBAL_HEAP_SIZE 1024       // 공유 힙 int 1024개
 #define DEFAULT_TASK_HEAP_SIZE 256  // [수정] 태스크당 기본 할당 힙 크기 (int 단위)
 

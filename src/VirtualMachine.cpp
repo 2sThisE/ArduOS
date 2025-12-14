@@ -143,13 +143,19 @@ void VM_runStep(Task* t) {
       int addr = t->stack[t->sp--];
       int phys_addr = Kernel_getPhysAddr(t, addr);
       
-      // 힙 범위 체크 및 출력
-      while (phys_addr >= 0 && phys_addr < GLOBAL_HEAP_SIZE) {
+      char temp_string_buffer[128]; // 임시 문자열 버퍼 (최대 127자 + 널)
+      int i = 0;
+
+      // 힙 범위 체크 및 버퍼에 문자 복사
+      while (phys_addr >= 0 && phys_addr < GLOBAL_HEAP_SIZE && i < sizeof(temp_string_buffer) - 1) {
         int val = global_heap[phys_addr];
         if (val == 0) break; // NULL 종료
-        Kernel_stdWriteChar(FD_STDOUT, (char)val);
+        temp_string_buffer[i++] = (char)val;
         phys_addr++;
       }
+      temp_string_buffer[i] = 0; // 널 종료
+
+      Kernel_stdWrite(FD_STDOUT, temp_string_buffer);
       break;
     }
     case OP_READ: { 

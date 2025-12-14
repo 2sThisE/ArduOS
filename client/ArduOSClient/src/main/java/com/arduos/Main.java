@@ -31,6 +31,8 @@ public class Main {
     public static final int PT_NONE     = 0;
     public static final int PT_STRING   = 1;
 
+    private static boolean interactiveMode = false; // [신규] 상호작용 모드 플래그
+
     public static void main(String[] args) {
         System.out.println("=== ArduOS Client v2.0 ===");
         
@@ -76,8 +78,7 @@ public class Main {
         printHelp();
         while (true) {
             // 프롬프트 출력 (비동기 출력이 섞일 수 있음)
-            try { Thread.sleep(100); } catch (InterruptedException e) {} 
-            System.out.print("> ");
+            try { Thread.sleep(100); } catch (InterruptedException e) {}
             
             String input = scanner.nextLine().trim();
 
@@ -141,6 +142,23 @@ public class Main {
     }
 
     private static void processInput(String input) {
+        // [신규] 상호작용 모드 처리
+        if (interactiveMode) {
+            if (input.equalsIgnoreCase("exit_shell")) {
+                interactiveMode = false;
+                System.out.println("Exited interactive mode.");
+                return;
+            }
+            // 입력값을 그대로 STDIN 패킷으로 전송
+            // (개행 문자 추가해서 전송하는 것이 일반적)
+            byte[] payload = (input + "\n").getBytes(StandardCharsets.UTF_8);
+            byte[] packet = protocol.toBytes(payload, StreamProtocol.UNFRAGED, (byte)PT_STRING, CMD_STDIN);
+            if (packet != null) {
+                serialPort.writeBytes(packet, packet.length);
+            }
+            return;
+        }
+
         String[] parts = input.split("\\s+", 2);
         String cmd = parts[0].toLowerCase();
         String arg = (parts.length > 1) ? parts[1] : "";
@@ -165,7 +183,20 @@ public class Main {
                         System.out.println("Usage: exec <filename>");
                         return;
                     }
-                    packet = protocol.toBytes(arg.getBytes(StandardCharsets.UTF_8), StreamProtocol.UNFRAGED, (byte)PT_STRING, SYS_EXEC);
+                    // "0 " 접두사 추가 (비동기 기본) -> 사용자가 직접 "1 file" 입력 가능
+                    // 만약 사용자가 "1 ..."로 입력했다면 그대로 둠
+                    String payloadStr = arg;
+                    if (!arg.startsWith("0 ") && !arg.startsWith("1 ")) {
+                        payloadStr = "0 " + arg;
+                    }
+                    
+                    // [신규] 쉘 실행 시 상호작용 모드 진입 (파일명에 'shell'이 포함되면)
+                    if (payloadStr.contains("shell")) {
+                        interactiveMode = true;
+                        System.out.println("Entering interactive mode. Type 'exit_shell' to quit.");
+                    }
+
+                    packet = protocol.toBytes(payloadStr.getBytes(StandardCharsets.UTF_8), StreamProtocol.UNFRAGED, (byte)PT_STRING, SYS_EXEC);
                     break;
                 case "cd":
                     if (arg.isEmpty()) {
@@ -200,9 +231,11 @@ public class Main {
         switch (cmd) {
             case CMD_STDOUT:
                 System.out.print(payloadStr); // 아두이노 출력
+                System.out.flush();
                 break;
             case CMD_STDERR:
                 System.err.print(payloadStr); // 아두이노 에러
+                System.err.flush();
                 break;
             default:
                 // System.out.println("[Rx] Cmd: " + cmd + ", Data: " + payloadStr);
